@@ -24,11 +24,11 @@ impl Context {
         self.0.insert(name, val)
     }
 
-    pub fn iter_vars(&self) -> hash_map::Iter<String,String> {
+    pub fn iter_vars(&self) -> hash_map::Iter<'_, String,String> {
         self.0.iter()
     }
 
-    pub fn iter_vars_mut(&mut self) -> hash_map::IterMut<String,String> {
+    pub fn iter_vars_mut(&mut self) -> hash_map::IterMut<'_, String,String> {
         self.0.iter_mut()
     }
 }

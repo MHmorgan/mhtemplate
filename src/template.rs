@@ -26,7 +26,7 @@ pub trait Template : fmt::Debug {
 struct TextNode (String);
 
 impl Template for TextNode {
-    fn evaluate(&self, ctx: &mut Context) -> Result<String> {
+    fn evaluate(&self, _ctx: &mut Context) -> Result<String> {
         Ok(self.0.clone())
     }
 }
@@ -204,7 +204,7 @@ impl ConditionalNode {
 struct RawNode (String);
 
 impl Template for RawNode {
-    fn evaluate(&self, ctx: &mut Context) -> Result<String> {
+    fn evaluate(&self, _ctx: &mut Context) -> Result<String> {
         Ok(self.0.clone())
     }
 }

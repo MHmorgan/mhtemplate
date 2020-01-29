@@ -1,5 +1,5 @@
 
-extern crate regex;
+use regex;
 
 use std::error::Error;
 use std::fmt;
@@ -21,7 +21,7 @@ impl TmplError {
 }
 
 impl fmt::Display for TmplError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.message)
     }
 }

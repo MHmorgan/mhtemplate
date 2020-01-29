@@ -554,7 +554,6 @@ impl fmt::Display for ExprToken {
 #[derive(Default)]
 pub struct ExpressionFactory {
     buf: VecDeque<char>,
-    expr: Expr,
     // Expression tokens
     tokens: VecDeque<ExprToken>,
 
@@ -573,15 +572,13 @@ impl ExpressionFactory {
     pub fn new<T>(text: T) -> Self
         where T: Into<VecDeque<char>>
     {
-
-        let mut expr = ExpressionFactory{
+        let mut efac = ExpressionFactory{
             buf: text.into(),
             ..Default::default()
         };
         // Update lookaheads
-        expr.next_char();
-
-        expr
+        efac.next_char();
+        efac
     }
 
     fn next_char(&mut self) -> Option<char> {
@@ -759,8 +756,6 @@ impl ExpressionFactory {
             };
         }
 
-        let current_tok = self.cur_tok.clone();
-
         let in_bracket = self.cur_tok.is_open_bracket();
         let mut expr = Expr::default();
 
@@ -878,8 +873,6 @@ impl ExpressionFactory {
                 ExprToken::Unknown => {
                     err!("invalid expression - {} expression token", tok);
                 },
-
-                _ => unreachable!(),
             }
 
             // Check if next token is ( when this function call is not for )

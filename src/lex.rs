@@ -1,6 +1,6 @@
 // Copyright 2019 Magnus Aa. Hirth. All rights reserved.
 
-extern crate regex;
+use regex;
 
 // TODO: clean lex code
 
