@@ -1,4 +1,7 @@
-/// Expression enum and factory for mhtemplate.
+/// The internal module `expr` implements the `ExpressionFactory`, defines the
+/// expression type `Expr`, and the generic trait `Evaluator` implement by
+/// `Expr`.
+
 // Copyright 2019 Magnus Aa. Hirth. All rights reserved.
 
 // TODO: add precedence to operators in expression

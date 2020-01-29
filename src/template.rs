@@ -9,6 +9,7 @@ use std::fmt;
 // -----------------------------------------------------------------------------
 // Template trait
 
+/// Common trait used to interract with templates.
 pub trait Template: fmt::Debug {
     fn evaluate(&self, ctx: &mut Context) -> Result<String>;
     // fn failed(&self) -> bool;
@@ -218,6 +219,7 @@ impl Template for WithNode {
  *                                                                             *
  *******************************************************************************/
 
+/// Parses template text to produce a template object, to be evaluated.
 #[derive(Clone, Default)]
 pub struct TemplateFactory {
     source: String,

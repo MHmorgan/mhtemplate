@@ -1,8 +1,10 @@
+/// The internal module `lex` implements the scanner of template strings, and
+/// defines all template lexemes. Any expression encountered are handled by the
+/// ExpressionFactory from the internal module `expr`.
+
 // Copyright 2019 Magnus Aa. Hirth. All rights reserved.
 
 use regex;
-
-// TODO: clean lex code
 
 use crate::{Expr, ExpressionFactory, Result, TmplError};
 use std::collections::VecDeque;
