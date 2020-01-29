@@ -1,17 +1,19 @@
-// Copyright 2019 Magnus Aa. Hirth. All rights reserved.
+// Copyright 2020 Magnus Aa. Hirth. All rights reserved.
+//
+// The module `template` implements the `TemplateFactory` and all template
+// nodes, which make up a template.
 
-// use crate::parse::{self,Tree,Variable};
 use crate::{Context, Evaluator, Expr, Lexeme, Result, Scanner, TmplError};
 use std::collections::VecDeque;
 use std::fmt;
-// use std::sync::{Arc,Mutex};
+
 
 // -----------------------------------------------------------------------------
 // Template trait
 
+/// Common trait used to interract with templates.
 pub trait Template: fmt::Debug {
     fn evaluate(&self, ctx: &mut Context) -> Result<String>;
-    // fn failed(&self) -> bool;
 }
 
 /*******************************************************************************
@@ -218,6 +220,7 @@ impl Template for WithNode {
  *                                                                             *
  *******************************************************************************/
 
+/// Parses template text to produce a template object, to be evaluated.
 #[derive(Clone, Default)]
 pub struct TemplateFactory {
     source: String,

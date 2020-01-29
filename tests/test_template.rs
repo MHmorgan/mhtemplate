@@ -1,4 +1,4 @@
-// Copyright 2019 Magnus Aa. Hirth. All rights reserved.
+// Copyright 2020 Magnus Aa. Hirth. All rights reserved.
 
 use mhtemplate::{Context, TemplateFactory};
 

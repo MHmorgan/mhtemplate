@@ -1,4 +1,7 @@
-// Copyright 2019 Magnus Aa. Hirth. All rights reserved.
+// Copyright 2020 Magnus Aa. Hirth. All rights reserved.
+//
+// The module `context` implements the `Context` type used to create scopes 
+// during evaluation of templates.
 
 use std::collections::{hash_map, HashMap};
 use std::ops::{Index, IndexMut};
@@ -6,7 +9,6 @@ use std::ops::{Index, IndexMut};
 /// Evaluation context containing variable values.
 ///
 /// A context can be created from the programs enviroment:
-///
 /// ```Rust
 /// let vars = std::env::vars();
 /// let ctx  = Context::from(vars);
@@ -44,6 +46,12 @@ impl Context {
 }
 
 impl From<std::env::Vars> for Context {
+
+    /// ```
+    /// let vars = std::env::vars();
+    /// let ctx  = Context::from(vars);
+    /// ```
+    /// 
     fn from(vars: std::env::Vars) -> Self {
         let mut ctx = Context {
             ..Default::default()
@@ -56,6 +64,13 @@ impl From<std::env::Vars> for Context {
 }
 
 impl From<HashMap<String, String>> for Context {
+
+    /// ```
+    /// let mut vars = HashMap::new();
+    /// vars.insert(String::from("one"), String::from("1"));
+    /// let mut ctx = Context::from(vars);
+    /// ```
+    /// 
     fn from(vars: HashMap<String, String>) -> Self {
         Context(vars.clone())
     }

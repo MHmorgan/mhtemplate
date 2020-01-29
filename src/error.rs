@@ -1,3 +1,5 @@
+// Copyright 2020 Magnus Aa. Hirth. All rights reserved.
+
 use regex;
 
 use std::error::Error;
