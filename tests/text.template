@@ -1,0 +1,40 @@
+{% set num 4
+   set str Hello World %}
+
+{%- repeat $num -%}
+Brrapp {% end %}
+
+{%- for VAL in $num -%}
+{{ $VAL }}
+{% end %}
+
+{% for i, s in $str -%}
+{{ $i }} - {{ $s }}
+{%end%}
+
+{%- if $num > 6 %}
+NOT PRINTED (if)
+{%- elif $num == 4 %}
+PRINTED (elif)
+{%- else %}
+NOT PRINTED (else)
+{%- end %}
+
+
+{%- with
+   set num 6
+   set str UGH %}
+Ut enim ad minim {{ $str }}, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
+
+{%- if $num > 6 %}
+NOT PRINTED (if)
+{%- elif $num == 4 %}
+NOT PRINTED (elif)
+{%- else %}
+PRINTED (else)
+{%- end %}
+
+Duis aute irure dolor in reprehenderit in voluptate velit {{ $num }} cillum dolore eu fugiat nulla pariatur.
+{% end -%}
+
+Excepteur sint occaecat cupidatat non {{ $str }}, sunt in culpa qui officia deserunt mollit anim id est {{ $num }}.
