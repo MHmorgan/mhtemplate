@@ -5,8 +5,10 @@ use std::error::Error;
 use std::fmt;
 use std::io;
 
+/// mhtemplate specific Result, returning `TmplError`
 pub type Result<T> = std::result::Result<T, TmplError>;
 
+/// TmplError is the error returned by all methods of the mhtemplate crate
 #[derive(Debug, Clone)]
 pub struct TmplError {
     message: String,

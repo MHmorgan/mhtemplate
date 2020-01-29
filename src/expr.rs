@@ -2,14 +2,20 @@
 
 // Copyright 2019 Magnus Aa. Hirth. All rights reserved.
 
+// TODO: add precedence to operators in expression
+
 use crate::{Context,Result,TmplError};
 use std::collections::VecDeque;
 use std::fmt;
 
+
+/// Any expression that should be evaluated are an evaluator. Used to as an 
+/// abstraction to hide concrete expression types.
 pub trait Evaluator<T> {
     fn evaluate(&self, ctx: &Context) -> Result<T>;
 }
 
+// Abstraction of conversion fram a template string value to a rust boolean.
 fn str2bool(s: &str) -> bool {
     let num: std::result::Result<f64,_> = s.parse();
     let txt: std::result::Result<bool,_> = s.to_lowercase().parse();
@@ -20,6 +26,13 @@ fn str2bool(s: &str) -> bool {
         _          => false,
     }
 }
+
+#[inline]
+fn feq(lhs: f64, rhs: f64) -> bool {
+    let error = 0.0001;
+    (lhs - rhs).abs() < error
+}
+
 
 /*******************************************************************************
  *                                                                             *
@@ -62,6 +75,8 @@ impl Expr {
         }
     }
 
+    // Print the expression as a tree
+    #[allow(unused)]
     pub fn print_expression(&self, depth: u32) {
 
         let mut indent = String::new();
@@ -256,13 +271,13 @@ impl Evaluator<String> for Expr {
             Expr::Eq { lhs, rhs } => {
                 let lhs: f64 = lhs.evaluate(&ctx)?;
                 let rhs: f64 = rhs.evaluate(&ctx)?;
-                let res = lhs == rhs;
+                let res = feq(lhs, rhs);
                 Ok(res.to_string())
             },
             Expr::Neq { lhs, rhs } => {
                 let lhs: f64 = lhs.evaluate(&ctx)?;
                 let rhs: f64 = rhs.evaluate(&ctx)?;
-                let res = lhs != rhs;
+                let res = !feq(lhs, rhs);
                 Ok(res.to_string())
             },
             Expr::Concat { lhs, rhs } => {
@@ -363,13 +378,13 @@ impl Evaluator<f64> for Expr {
             Expr::Eq { lhs, rhs } => {
                 let lhs: f64 = lhs.evaluate(&ctx)?;
                 let rhs: f64 = rhs.evaluate(&ctx)?;
-                let res = lhs == rhs;
+                let res = feq(lhs, rhs);
                 if res { Ok(1.0) } else { Ok(0.0) }
             },
             Expr::Neq { lhs, rhs } => {
                 let lhs: f64 = lhs.evaluate(&ctx)?;
                 let rhs: f64 = rhs.evaluate(&ctx)?;
-                let res = lhs != rhs;
+                let res = !feq(lhs, rhs);
                 if res { Ok(1.0) } else { Ok(0.0) }
             },
             Expr::Concat { lhs, rhs } => {
@@ -464,12 +479,12 @@ impl Evaluator<bool> for Expr {
             Expr::Eq { lhs, rhs } => {
                 let lhs: f64 = lhs.evaluate(&ctx)?;
                 let rhs: f64 = rhs.evaluate(&ctx)?;
-                Ok(lhs == rhs)
+                Ok(feq(lhs, rhs))
             },
             Expr::Neq { lhs, rhs } => {
                 let lhs: f64 = lhs.evaluate(&ctx)?;
                 let rhs: f64 = rhs.evaluate(&ctx)?;
-                Ok(lhs != rhs)
+                Ok(!feq(lhs, rhs))
             },
             Expr::Concat { lhs, rhs } => {
                 let lhs: String = lhs.evaluate(&ctx)?;
@@ -517,6 +532,7 @@ enum ExprToken {
 }
 
 impl ExprToken {
+    #[allow(unused)]
     pub fn is_unknown(&self) -> bool {
         match self {
             ExprToken::Unknown => true,
@@ -606,12 +622,12 @@ impl ExpressionFactory {
 
         // Generate expression tokens
 
-        'scan: while let Some(ch) = self.next_char() {
+        while let Some(ch) = self.next_char() {
             match ch {
                 // Variable
                 '$' => {
                     let ident = self.scan_ident()?;
-                    self.tokens.push_back(ExprToken::Variable { ident: ident });
+                    self.tokens.push_back(ExprToken::Variable { ident });
                 }
                 // Increase
                 '+' if Some('+') == self.next_ch => {
@@ -666,14 +682,14 @@ impl ExpressionFactory {
                 // Quoted const
                 '"' | '\'' => {
                     let val = self.scan_value(Some(ch))?;
-                    self.tokens.push_back(ExprToken::Const { val: val });
+                    self.tokens.push_back(ExprToken::Const { val });
                 },
                 // Ignore whitespaces in expression
                 _ if ch.is_whitespace() => (),
                 // Const
                 _ => {
                     let val = self.scan_value(None)?;
-                    self.tokens.push_back(ExprToken::Const { val: val });
+                    self.tokens.push_back(ExprToken::Const { val });
                 },
             }
         }
@@ -763,14 +779,14 @@ impl ExpressionFactory {
             match tok {
 
                 ExprToken::Const { val } => {
-                    expr = Expr::Const { val: val };
+                    expr = Expr::Const { val };
                     if Some(ExprToken::CloseBracket) == self.next_tok {
                         break 'parse;
                     }
                 },
 
                 ExprToken::Variable { ident } => {
-                    expr = Expr::Variable { ident: ident };
+                    expr = Expr::Variable { ident };
                     if Some(ExprToken::CloseBracket) == self.next_tok {
                         break 'parse;
                     }
@@ -801,7 +817,7 @@ impl ExpressionFactory {
 
                 ExprToken::Pluss => {
                     let rhs = Box::new(self.parse_expression()?);
-                    expr = Expr::Add { lhs: Box::new(expr), rhs: rhs };
+                    expr = Expr::Add { lhs: Box::new(expr), rhs };
                 },
 
                 ExprToken::Minus if expr.is_unknown() => {
@@ -810,47 +826,47 @@ impl ExpressionFactory {
 
                 ExprToken::Minus => {
                     let rhs = Box::new(self.parse_expression()?);
-                    expr = Expr::Sub { lhs: Box::new(expr), rhs: rhs };
+                    expr = Expr::Sub { lhs: Box::new(expr), rhs };
                 },
 
                 ExprToken::Muliply => {
                     let rhs = Box::new(self.parse_expression()?);
-                    expr = Expr::Mul { lhs: Box::new(expr), rhs: rhs };
+                    expr = Expr::Mul { lhs: Box::new(expr), rhs };
                 },
 
                 ExprToken::Divide => {
                     let rhs = Box::new(self.parse_expression()?);
-                    expr = Expr::Div { lhs: Box::new(expr), rhs: rhs };
+                    expr = Expr::Div { lhs: Box::new(expr), rhs };
                 },
 
                 ExprToken::LessThan => {
                     let rhs = Box::new(self.parse_expression()?);
-                    expr = Expr::Lt { lhs: Box::new(expr), rhs: rhs };
+                    expr = Expr::Lt { lhs: Box::new(expr), rhs };
                 },
 
                 ExprToken::GreaterThan => {
                     let rhs = Box::new(self.parse_expression()?);
-                    expr = Expr::Gt { lhs: Box::new(expr), rhs: rhs };
+                    expr = Expr::Gt { lhs: Box::new(expr), rhs };
                 },
 
                 ExprToken::LessEqual => {
                     let rhs = Box::new(self.parse_expression()?);
-                    expr = Expr::Leq { lhs: Box::new(expr), rhs: rhs };
+                    expr = Expr::Leq { lhs: Box::new(expr), rhs };
                 },
 
                 ExprToken::GreaterEqual => {
                     let rhs = Box::new(self.parse_expression()?);
-                    expr = Expr::Geq { lhs: Box::new(expr), rhs: rhs };
+                    expr = Expr::Geq { lhs: Box::new(expr), rhs };
                 },
 
                 ExprToken::Equal => {
                     let rhs = Box::new(self.parse_expression()?);
-                    expr = Expr::Eq { lhs: Box::new(expr), rhs: rhs };
+                    expr = Expr::Eq { lhs: Box::new(expr), rhs };
                 },
 
                 ExprToken::NotEqual => {
                     let rhs = Box::new(self.parse_expression()?);
-                    expr = Expr::Neq { lhs: Box::new(expr), rhs: rhs };
+                    expr = Expr::Neq { lhs: Box::new(expr), rhs };
                 },
 
                 ExprToken::Not => {
@@ -859,7 +875,7 @@ impl ExpressionFactory {
 
                 ExprToken::Concat => {
                     let rhs = Box::new(self.parse_expression()?);
-                    expr = Expr::Concat { lhs: Box::new(expr), rhs: rhs };
+                    expr = Expr::Concat { lhs: Box::new(expr), rhs };
                 },
 
                 ExprToken::OpenBracket => {
@@ -899,11 +915,11 @@ impl ExpressionFactory {
         if let Some(tok) = self.next_token() {
             match tok {
                 ExprToken::Variable { ident } => {
-                    let val = Expr::Variable { ident: ident };
+                    let val = Expr::Variable { ident };
                     Ok(Expr::Neg { expr: Box::new(val) })
                 },
                 ExprToken::Const { val } => {
-                    let val = Expr::Const { val: val };
+                    let val = Expr::Const { val };
                     Ok(Expr::Neg { expr: Box::new(val) })
                 },
                 ExprToken::OpenBracket => {
@@ -928,11 +944,11 @@ impl ExpressionFactory {
         if let Some(tok) = self.next_token() {
             match tok {
                 ExprToken::Variable { ident } => {
-                    let val = Expr::Variable { ident: ident };
+                    let val = Expr::Variable { ident };
                     Ok(Expr::Not { expr: Box::new(val) })
                 },
                 ExprToken::Const { val } => {
-                    let val = Expr::Const { val: val };
+                    let val = Expr::Const { val };
                     Ok(Expr::Not { expr: Box::new(val) })
                 },
                 ExprToken::OpenBracket => {

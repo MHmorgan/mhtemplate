@@ -22,7 +22,7 @@ NOT PRINTED (else)
 
 
 {%- with
-   set num 6
+   set num (($num*2) - 1)--
    set str UGH %}
 Ut enim ad minim {{ $str }}, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
 

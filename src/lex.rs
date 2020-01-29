@@ -158,16 +158,12 @@ impl Scanner {
     fn handle_statement(&mut self) -> Result<()> {
 
         lazy_static! {
-            static ref STMT_WITH_RE: Regex     = Regex::new(r"^with$").unwrap();
             static ref STMT_SET_RE: Regex      = Regex::new(r"^set\s(?P<ident>\S+)\s(?P<expr>.+)").unwrap();
             static ref STMT_FOR_RE: Regex      = Regex::new(r"^for\s(?P<ident>\S+)\sin\s(?P<expr>.+)").unwrap();
             static ref STMT_FORCNT_RE: Regex   = Regex::new(r"^for\s(?P<ident_i>\S+),\s(?P<ident>\S+)\sin\s(?P<expr>.+)$").unwrap();
-            static ref STMT_END_RE: Regex      = Regex::new(r"^end$").unwrap();
             static ref STMT_REPEAT_RE: Regex   = Regex::new(r"^repeat\s(?P<expr>.+)$").unwrap();
             static ref STMT_IF_RE: Regex       = Regex::new(r"^if\s(?P<expr>.+)$").unwrap();
             static ref STMT_ELIF_RE: Regex     = Regex::new(r"^elif\s(?P<expr>.+)$").unwrap();
-            static ref STMT_ELSE_RE: Regex     = Regex::new(r"^else$").unwrap();
-            static ref STMT_RAW_RE: Regex      = Regex::new(r"^raw$").unwrap();
             static ref STMT_DEFINE_RE: Regex   = Regex::new(r"^define\s(?P<ident>\S+)$").unwrap();
             static ref STMT_TEMPLATE_RE: Regex = Regex::new(r"^template\s(?P<ident>\S+)$").unwrap();
         }
@@ -176,7 +172,7 @@ impl Scanner {
         self.current.clear();
 
         // With
-        if STMT_WITH_RE.is_match(&txt) {
+        if &txt == "with" {
             self.lexemes.push_back(Lexeme::With);
             return Ok(())
         }
@@ -219,7 +215,7 @@ impl Scanner {
         }
 
         // End
-        if STMT_END_RE.is_match(&txt) {
+        if &txt == "end" {
             self.lexemes.push_back(Lexeme::End);
             return Ok(())
         }
@@ -258,13 +254,13 @@ impl Scanner {
         }
 
         // Else
-        if STMT_ELSE_RE.is_match(&txt) {
+        if &txt == "else" {
             self.lexemes.push_back(Lexeme::Else);
             return Ok(())
         }
 
         // Raw
-        if STMT_RAW_RE.is_match(&txt) {
+        if &txt == "raw" {
             self.lexemes.push_back(Lexeme::Raw);
             return Ok(())
         }
@@ -360,7 +356,7 @@ impl Scanner {
         let txt = String::from(self.current.trim());
         self.current.clear();
 
-        self.lexemes.push_back(Lexeme::Comment { text: String::from(txt) });
+        self.lexemes.push_back(Lexeme::Comment { text: txt });
         Ok(())
     }
 

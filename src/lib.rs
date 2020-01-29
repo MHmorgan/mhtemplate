@@ -1,9 +1,31 @@
 //! Text template library.
 //! 
+//! A template is a text which may contain special tokens:
+//! * Statements: `{% ... %}`
+//! * Expression: `{{ ... }}`
+//! * Comments:   `{# ... #}`
+//! 
+//! ## Expressions
+//! 
 //! TODO
-//! ====
-//! * Call evaluate multiple times on a template, allowing multiple errors to
-//!   be recorded by calling evaluate after previous call returned error.
+//! 
+//! ## Statements
+//! 
+//! Supported statements are loops, conditionals, `set` and `with`.
+//! 
+//! ### Loops
+//! 
+//! A repeat loop:
+//! ```Text
+//! {% repeat <expr> %}
+//! Hello
+//! {% end %}
+//! ```
+//! 
+//! ## Example
+//! 
+//! ```
+//! ```
 
 // Copyright 2019 Magnus Aa. Hirth. All rights reserved.
 

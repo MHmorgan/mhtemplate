@@ -107,7 +107,7 @@ impl Template for ForNode {
 
         let expr: String = self.expr.evaluate(&context)?;
         let mut new_ctx = Context::from(&*context);
-        for (i, itm) in expr.split_whitespace().map( |s| String::from(s) ).enumerate() {
+        for (i, itm) in expr.split_whitespace().map( String::from ).enumerate() {
             new_ctx[&self.ident] = itm;
             if let Some(ident_i) = &self.cnt {
                 new_ctx[ident_i] = i.to_string();
@@ -311,7 +311,7 @@ impl TemplateFactory {
                 },
 
                 // Ignore comments
-                Lexeme::Comment { text: _ } => (),
+                Lexeme::Comment { .. } => (),
 
                 Lexeme::Set { ident, val } => {
                     block.add_node(Box::new(SetNode(ident, val)));
@@ -320,20 +320,20 @@ impl TemplateFactory {
                 Lexeme::For { ident, expr } => {
                     let content = self.parse_block()?;
                     block.add_node(Box::new(ForNode {
-                        ident: ident,
+                        ident,
                         cnt: None,
-                        expr: expr,
-                        content: content,
+                        expr,
+                        content,
                     }))
                 },
 
                 Lexeme::ForCnt   { ident, ident_i, expr } => {
                     let content = self.parse_block()?;
                     block.add_node(Box::new(ForNode {
-                        ident: ident,
+                        ident,
                         cnt: Some(ident_i),
-                        expr: expr,
-                        content: content,
+                        expr,
+                        content,
                     }))
                 },
 
@@ -352,7 +352,7 @@ impl TemplateFactory {
                 },
 
                 // Elif should only be found when parsing If
-                Lexeme::Elif { expr: _ } => {
+                Lexeme::Elif { .. } => {
                     err!("invalid elif outside if");
                 },
 
@@ -403,7 +403,7 @@ impl TemplateFactory {
                 },
 
                 // Ignore comments
-                Lexeme::Comment { text: _ } => (),
+                Lexeme::Comment { .. } => (),
 
                 Lexeme::Set { ident, val } => {
                     block.add_node(Box::new(SetNode(ident, val)));
@@ -412,20 +412,20 @@ impl TemplateFactory {
                 Lexeme::For { ident, expr } => {
                     let content = self.parse_block()?;
                     block.add_node(Box::new(ForNode {
-                        ident: ident,
+                        ident,
                         cnt: None,
-                        expr: expr,
-                        content: content,
+                        expr,
+                        content,
                     }))
                 },
 
                 Lexeme::ForCnt   { ident, ident_i, expr } => {
                     let content = self.parse_block()?;
                     block.add_node(Box::new(ForNode {
-                        ident: ident,
+                        ident,
                         cnt: Some(ident_i),
-                        expr: expr,
-                        content: content,
+                        expr,
+                        content,
                     }))
                 },
 

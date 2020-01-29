@@ -3,7 +3,15 @@
 use std::collections::{hash_map,HashMap};
 use std::ops::{Index,IndexMut};
 
-
+/// Evaluation context containing variable values.
+/// 
+/// A context can be created from the programs enviroment:
+/// 
+/// ```Rust
+/// let vars = std::env::vars();
+/// let ctx  = Context::from(vars);
+/// ```
+/// 
 #[derive(Debug,Default,Clone,PartialEq,Eq)]
 pub struct Context (HashMap<String,String>);
 
@@ -12,11 +20,11 @@ impl Context {
         Context { ..Default::default() }
     }
 
-    pub fn var(&self, name: &String) -> Option<&String> {
+    pub fn var(&self, name: &str) -> Option<&String> {
         self.0.get(name)
     }
 
-    pub fn var_mut(&mut self, name: &String) -> Option<&mut String> {
+    pub fn var_mut(&mut self, name: &str) -> Option<&mut String> {
         self.0.get_mut(name)
     }
 
@@ -55,18 +63,18 @@ impl From<&Context> for Context {
     }
 }
 
-impl Index<&String> for Context {
+impl Index<&str> for Context {
     type Output = String;
 
-    fn index(&self, index: &String) -> &Self::Output {
+    fn index(&self, index: &str) -> &Self::Output {
         self.0.index(index)
     }
 }
 
-impl IndexMut<&String> for Context {
-    fn index_mut(&mut self, index: &String) -> &mut Self::Output {
+impl IndexMut<&str> for Context {
+    fn index_mut(&mut self, index: &str) -> &mut Self::Output {
         if !self.0.contains_key(index) {
-            self.0.insert(index.clone(), String::new());
+            self.0.insert(String::from(index), String::new());
         }
         self.0.get_mut(index).unwrap()
     }
