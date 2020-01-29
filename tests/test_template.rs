@@ -1,12 +1,9 @@
 // Copyright 2019 Magnus Aa. Hirth. All rights reserved.
 
-
-
-use mhtemplate::{Context,TemplateFactory};
+use mhtemplate::{Context, TemplateFactory};
 
 #[test]
 fn test_template() {
-
     let want = include_str!("text.txt");
     let text = include_str!("text.template");
     let tmpl = TemplateFactory::new(&text).parse().unwrap();

@@ -1,20 +1,18 @@
 // Copyright 2019 Magnus Aa. Hirth. All rights reserved.
 
 // use crate::parse::{self,Tree,Variable};
-use crate::{Evaluator,Expr,Lexeme,Scanner,Result,Context,TmplError};
+use crate::{Context, Evaluator, Expr, Lexeme, Result, Scanner, TmplError};
 use std::collections::VecDeque;
 use std::fmt;
 // use std::sync::{Arc,Mutex};
 
-
 // -----------------------------------------------------------------------------
 // Template trait
 
-pub trait Template : fmt::Debug {
+pub trait Template: fmt::Debug {
     fn evaluate(&self, ctx: &mut Context) -> Result<String>;
     // fn failed(&self) -> bool;
 }
-
 
 /*******************************************************************************
  *                                                                             *
@@ -22,8 +20,8 @@ pub trait Template : fmt::Debug {
  *                                                                             *
  *******************************************************************************/
 
-#[derive(Default,Debug)]
-struct TextNode (String);
+#[derive(Default, Debug)]
+struct TextNode(String);
 
 impl Template for TextNode {
     fn evaluate(&self, _ctx: &mut Context) -> Result<String> {
@@ -31,12 +29,11 @@ impl Template for TextNode {
     }
 }
 
-
 // -----------------------------------------------------------------------------
 // Composite node
 
-#[derive(Default,Debug)]
-struct CompositeNode (Vec<Box<dyn Template>>);
+#[derive(Default, Debug)]
+struct CompositeNode(Vec<Box<dyn Template>>);
 
 impl Template for CompositeNode {
     fn evaluate(&self, ctx: &mut Context) -> Result<String> {
@@ -55,12 +52,11 @@ impl CompositeNode {
     }
 }
 
-
 // -----------------------------------------------------------------------------
 
 // Set      { ident: String, val: Box<Expr> },
-#[derive(Default,Debug)]
-struct SetNode (String, Box<Expr>);
+#[derive(Default, Debug)]
+struct SetNode(String, Box<Expr>);
 
 impl Template for SetNode {
     fn evaluate(&self, ctx: &mut Context) -> Result<String> {
@@ -70,16 +66,15 @@ impl Template for SetNode {
     }
 }
 
-
 // -----------------------------------------------------------------------------
 
 // For      { ident: String, expr: Box<Expr> },
 // ForCnt   { ident: String, ident_i: String, expr: Box<Expr> },
-#[derive(Default,Debug)]
+#[derive(Default, Debug)]
 struct ForNode {
-    ident:   String,
-    cnt:     Option<String>,
-    expr:    Box<Expr>,
+    ident: String,
+    cnt: Option<String>,
+    expr: Box<Expr>,
     content: CompositeNode,
 }
 
@@ -93,21 +88,21 @@ impl Template for ForNode {
         if let Ok(num) = num {
             let num = num.abs() as usize;
             let mut new_ctx = Context::from(&*context);
-            for i in (0..num).map( |i| i.to_string() ) {
+            for i in (0..num).map(|i| i.to_string()) {
                 new_ctx[&self.ident] = i.clone();
                 if let Some(ident_i) = &self.cnt {
                     new_ctx[ident_i] = i;
                 }
                 ret.push_str(&self.content.evaluate(&mut new_ctx)?);
             }
-            return Ok(ret)
+            return Ok(ret);
         }
 
         // Evaluate as string as default
 
         let expr: String = self.expr.evaluate(&context)?;
         let mut new_ctx = Context::from(&*context);
-        for (i, itm) in expr.split_whitespace().map( String::from ).enumerate() {
+        for (i, itm) in expr.split_whitespace().map(String::from).enumerate() {
             new_ctx[&self.ident] = itm;
             if let Some(ident_i) = &self.cnt {
                 new_ctx[ident_i] = i.to_string();
@@ -118,12 +113,11 @@ impl Template for ForNode {
     }
 }
 
-
 // -----------------------------------------------------------------------------
 
 // Expr     { expr: Box<Expr> },
-#[derive(Default,Debug)]
-struct ExprNode (Box<Expr>);
+#[derive(Default, Debug)]
+struct ExprNode(Box<Expr>);
 
 impl Template for ExprNode {
     fn evaluate(&self, ctx: &mut Context) -> Result<String> {
@@ -131,12 +125,11 @@ impl Template for ExprNode {
     }
 }
 
-
 // -----------------------------------------------------------------------------
 
 // Repeat   { expr: Box<Expr> },
-#[derive(Default,Debug)]
-struct RepeatNode (Box<Expr>, CompositeNode);
+#[derive(Default, Debug)]
+struct RepeatNode(Box<Expr>, CompositeNode);
 
 impl Template for RepeatNode {
     fn evaluate(&self, ctx: &mut Context) -> Result<String> {
@@ -161,18 +154,16 @@ impl Template for RepeatNode {
     }
 }
 
-
 // -----------------------------------------------------------------------------
 
 // If       { expr: Box<Expr> },
 // Elif     { expr: Box<Expr> },
 // Else,
-#[derive(Default,Debug)]
-struct ConditionalNode (Vec<(Box<Expr>,CompositeNode)>, CompositeNode);
+#[derive(Default, Debug)]
+struct ConditionalNode(Vec<(Box<Expr>, CompositeNode)>, CompositeNode);
 
 impl Template for ConditionalNode {
     fn evaluate(&self, ctx: &mut Context) -> Result<String> {
-
         // Return first matching conditional block
         for (expr, nodes) in &self.0 {
             let cond: bool = expr.evaluate(&ctx)?;
@@ -196,12 +187,11 @@ impl ConditionalNode {
     }
 }
 
-
 // -----------------------------------------------------------------------------
 // Raw node, containing unparsed text
 
-#[derive(Default,Debug)]
-struct RawNode (String);
+#[derive(Default, Debug)]
+struct RawNode(String);
 
 impl Template for RawNode {
     fn evaluate(&self, _ctx: &mut Context) -> Result<String> {
@@ -209,12 +199,11 @@ impl Template for RawNode {
     }
 }
 
-
 // -----------------------------------------------------------------------------
 // With node, creating an inner scope
 
-#[derive(Default,Debug)]
-struct WithNode (CompositeNode);
+#[derive(Default, Debug)]
+struct WithNode(CompositeNode);
 
 impl Template for WithNode {
     fn evaluate(&self, ctx: &mut Context) -> Result<String> {
@@ -223,14 +212,13 @@ impl Template for WithNode {
     }
 }
 
-
 /*******************************************************************************
  *                                                                             *
  *  Template factory
  *                                                                             *
  *******************************************************************************/
 
-#[derive(Clone,Default)]
+#[derive(Clone, Default)]
 pub struct TemplateFactory {
     source: String,
     scanner: Scanner,
@@ -238,11 +226,11 @@ pub struct TemplateFactory {
 
     // Lookahead & -behind state
     initialized: bool,
-    cur_lex:     Lexeme,
-    prev_lex1:   Lexeme,
-    prev_lex2:   Lexeme,
-    next_lex1:   Option<Lexeme>,
-    next_lex2:   Option<Lexeme>,
+    cur_lex: Lexeme,
+    prev_lex1: Lexeme,
+    prev_lex2: Lexeme,
+    next_lex1: Option<Lexeme>,
+    next_lex2: Option<Lexeme>,
 }
 
 impl TemplateFactory {
@@ -259,7 +247,7 @@ impl TemplateFactory {
         if !self.initialized {
             self.initialized = true;
             self.scanner.scan_all()?;
-            self.lexemes   = self.scanner.clone().collect();
+            self.lexemes = self.scanner.clone().collect();
             self.next_lex1 = self.lexemes.pop_front();
             self.next_lex2 = self.lexemes.pop_front();
         }
@@ -273,7 +261,7 @@ impl TemplateFactory {
         if let Some(lex) = &lex {
             self.prev_lex2 = self.prev_lex1.clone();
             self.prev_lex1 = self.cur_lex.clone();
-            self.cur_lex   = lex.clone();
+            self.cur_lex = lex.clone();
         }
         lex
     }
@@ -281,7 +269,6 @@ impl TemplateFactory {
     fn error<S: ToString>(&self, msg: S) -> TmplError {
         TmplError::new(msg.to_string())
     }
-
 
     // -------------------------------------------------------------------------
     // Parsing methods
@@ -302,20 +289,22 @@ impl TemplateFactory {
             };
         }
 
-        let mut block = CompositeNode { ..Default::default() };
+        let mut block = CompositeNode {
+            ..Default::default()
+        };
 
         'parse_block: while let Some(lex) = self.next_lexeme() {
             match lex {
                 Lexeme::Text { text } => {
                     block.add_node(Box::new(TextNode(text)));
-                },
+                }
 
                 // Ignore comments
                 Lexeme::Comment { .. } => (),
 
                 Lexeme::Set { ident, val } => {
                     block.add_node(Box::new(SetNode(ident, val)));
-                },
+                }
 
                 Lexeme::For { ident, expr } => {
                     let content = self.parse_block()?;
@@ -325,9 +314,13 @@ impl TemplateFactory {
                         expr,
                         content,
                     }))
-                },
+                }
 
-                Lexeme::ForCnt   { ident, ident_i, expr } => {
+                Lexeme::ForCnt {
+                    ident,
+                    ident_i,
+                    expr,
+                } => {
                     let content = self.parse_block()?;
                     block.add_node(Box::new(ForNode {
                         ident,
@@ -335,48 +328,46 @@ impl TemplateFactory {
                         expr,
                         content,
                     }))
-                },
+                }
 
-                Lexeme::Expr { expr } => {
-                    block.add_node(Box::new(ExprNode(expr)))
-                },
+                Lexeme::Expr { expr } => block.add_node(Box::new(ExprNode(expr))),
 
                 Lexeme::Repeat { expr } => {
                     let content = self.parse_block()?;
                     block.add_node(Box::new(RepeatNode(expr, content)))
-                },
+                }
 
                 Lexeme::If { expr } => {
                     let conditional = self.parse_conditional_branch(expr)?;
                     block.add_node(Box::new(conditional))
-                },
+                }
 
                 // Elif should only be found when parsing If
                 Lexeme::Elif { .. } => {
                     err!("invalid elif outside if");
-                },
+                }
 
                 Lexeme::Raw => {
                     err!("raw statement not supported");
-                },
+                }
 
                 Lexeme::With => {
                     let content = self.parse_block()?;
                     block.add_node(Box::new(WithNode(content)))
-                },
+                }
 
                 // Reaching an end outside of a block stops template parsing
                 Lexeme::End => {
                     break 'parse_block;
-                },
+                }
 
                 Lexeme::Else => {
                     err!("invalid else outside if");
-                },
+                }
 
                 Lexeme::Unknown => {
                     err!("found unknown lexeme");
-                },
+                }
             }
         }
 
@@ -390,24 +381,24 @@ impl TemplateFactory {
                 return Err(self.error(format!($($arg)*)))
             };
         }
-        
+
         let mut cond_node = ConditionalNode::default();
         let mut condition = first_cond;
-        let mut block     = CompositeNode::default();
-        let mut in_else   = false;
+        let mut block = CompositeNode::default();
+        let mut in_else = false;
 
         'parse_cond: while let Some(lex) = self.next_lexeme() {
             match lex {
                 Lexeme::Text { text } => {
                     block.add_node(Box::new(TextNode(text)));
-                },
+                }
 
                 // Ignore comments
                 Lexeme::Comment { .. } => (),
 
                 Lexeme::Set { ident, val } => {
                     block.add_node(Box::new(SetNode(ident, val)));
-                },
+                }
 
                 Lexeme::For { ident, expr } => {
                     let content = self.parse_block()?;
@@ -417,9 +408,13 @@ impl TemplateFactory {
                         expr,
                         content,
                     }))
-                },
+                }
 
-                Lexeme::ForCnt   { ident, ident_i, expr } => {
+                Lexeme::ForCnt {
+                    ident,
+                    ident_i,
+                    expr,
+                } => {
                     let content = self.parse_block()?;
                     block.add_node(Box::new(ForNode {
                         ident,
@@ -427,37 +422,35 @@ impl TemplateFactory {
                         expr,
                         content,
                     }))
-                },
+                }
 
-                Lexeme::Expr { expr } => {
-                    block.add_node(Box::new(ExprNode(expr)))
-                },
+                Lexeme::Expr { expr } => block.add_node(Box::new(ExprNode(expr))),
 
                 Lexeme::Repeat { expr } => {
                     let content = self.parse_block()?;
                     block.add_node(Box::new(RepeatNode(expr, content)))
-                },
+                }
 
                 Lexeme::If { expr } => {
                     let conditional = self.parse_conditional_branch(expr)?;
                     block.add_node(Box::new(conditional))
-                },
+                }
 
                 // Elif should only be found when parsing If
                 Lexeme::Elif { expr } => {
                     cond_node.add_branch(condition.clone(), block);
                     condition = expr;
                     block = CompositeNode::default();
-                },
+                }
 
                 Lexeme::Raw => {
                     err!("raw statement not supported");
-                },
+                }
 
                 Lexeme::With => {
                     let content = self.parse_block()?;
                     block.add_node(Box::new(WithNode(content)))
-                },
+                }
 
                 // Reaching an end outside of a block stops template parsing
                 Lexeme::End => {
@@ -465,17 +458,17 @@ impl TemplateFactory {
                         cond_node.set_default_branch(block);
                     }
                     break 'parse_cond;
-                },
+                }
 
                 Lexeme::Else => {
                     cond_node.add_branch(condition.clone(), block);
                     block = CompositeNode::default();
                     in_else = true;
-                },
+                }
 
                 Lexeme::Unknown => {
                     err!("found unknown lexeme");
-                },
+                }
             }
         }
 
@@ -489,9 +482,10 @@ mod tests {
 
     #[test]
     fn test_template() {
-        let text = String::from("
+        let text = String::from(
+            "
             {%- set MYVAL \"Verden!\" -%}
-            Hello {{ $MYVAL }}"
+            Hello {{ $MYVAL }}",
         );
         let tmpl = TemplateFactory::new(&text).parse().unwrap();
         let text = tmpl.evaluate(&mut Context::new()).unwrap();

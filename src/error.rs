@@ -1,4 +1,3 @@
-
 use regex;
 
 use std::error::Error;
@@ -33,7 +32,6 @@ impl Error for TmplError {
         self.message.as_ref()
     }
 }
-
 
 // -----------------------------------------------------------------------------
 // From

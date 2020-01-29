@@ -1,23 +1,25 @@
 // Copyright 2019 Magnus Aa. Hirth. All rights reserved.
 
-use std::collections::{hash_map,HashMap};
-use std::ops::{Index,IndexMut};
+use std::collections::{hash_map, HashMap};
+use std::ops::{Index, IndexMut};
 
 /// Evaluation context containing variable values.
-/// 
+///
 /// A context can be created from the programs enviroment:
-/// 
+///
 /// ```Rust
 /// let vars = std::env::vars();
 /// let ctx  = Context::from(vars);
 /// ```
-/// 
-#[derive(Debug,Default,Clone,PartialEq,Eq)]
-pub struct Context (HashMap<String,String>);
+///
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
+pub struct Context(HashMap<String, String>);
 
 impl Context {
     pub fn new() -> Self {
-        Context { ..Default::default() }
+        Context {
+            ..Default::default()
+        }
     }
 
     pub fn var(&self, name: &str) -> Option<&String> {
@@ -32,27 +34,29 @@ impl Context {
         self.0.insert(name, val)
     }
 
-    pub fn iter_vars(&self) -> hash_map::Iter<'_, String,String> {
+    pub fn iter_vars(&self) -> hash_map::Iter<'_, String, String> {
         self.0.iter()
     }
 
-    pub fn iter_vars_mut(&mut self) -> hash_map::IterMut<'_, String,String> {
+    pub fn iter_vars_mut(&mut self) -> hash_map::IterMut<'_, String, String> {
         self.0.iter_mut()
     }
 }
 
 impl From<std::env::Vars> for Context {
     fn from(vars: std::env::Vars) -> Self {
-        let mut ctx = Context { ..Default::default() };
-        for (name,val) in vars {
+        let mut ctx = Context {
+            ..Default::default()
+        };
+        for (name, val) in vars {
             ctx.set_var(name, val);
         }
         ctx
     }
 }
 
-impl From<HashMap<String,String>> for Context {
-    fn from(vars: HashMap<String,String>) -> Self {
+impl From<HashMap<String, String>> for Context {
+    fn from(vars: HashMap<String, String>) -> Self {
         Context(vars.clone())
     }
 }
