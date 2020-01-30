@@ -10,6 +10,7 @@ use std::ops::{Index, IndexMut};
 ///
 /// A context can be created from the programs enviroment:
 /// ```Rust
+/// # use mhtemplate::Context;
 /// let vars = std::env::vars();
 /// let ctx  = Context::from(vars);
 /// ```
@@ -48,6 +49,7 @@ impl Context {
 impl From<std::env::Vars> for Context {
 
     /// ```
+    /// # use mhtemplate::Context;
     /// let vars = std::env::vars();
     /// let ctx  = Context::from(vars);
     /// ```
@@ -66,6 +68,8 @@ impl From<std::env::Vars> for Context {
 impl From<HashMap<String, String>> for Context {
 
     /// ```
+    /// # use mhtemplate::Context;
+    /// # use std::collections::HashMap;
     /// let mut vars = HashMap::new();
     /// vars.insert(String::from("one"), String::from("1"));
     /// let mut ctx = Context::from(vars);

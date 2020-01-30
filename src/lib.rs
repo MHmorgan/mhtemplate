@@ -102,12 +102,14 @@
 //! 
 //! Simple context:
 //! ```
+//! # use mhtemplate::Context;
 //! let mut ctx = Context::new();
 //! ctx["NUMBER"] = String::from("42");
 //! ```
 //! 
 //! Context from environment:
 //! ```
+//! # use mhtemplate::Context;
 //! let vars = std::env::vars();
 //! let ctx  = Context::from(vars);
 //! ```
@@ -153,7 +155,8 @@
 //! 
 //! Rust unsage:
 //! ```
-//! let text = include_str!("text.template");
+//! # use mhtemplate::{Context, TemplateFactory};
+//! let text = String::from("{% repeat 3 %} Hello {% end %}");
 //! let tmpl = TemplateFactory::new(&text).parse().unwrap();
 //! let text = tmpl.evaluate(&mut Context::new()).unwrap();
 //! ```
