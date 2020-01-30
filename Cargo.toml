@@ -1,8 +1,15 @@
 [package]
 name = "mhtemplate"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["m <mhmorgan42@gmail.com>"]
 edition = "2018"
+description = "Easy-to-use, dynamic text template library."
+readme = "README.md"
+keywords = ["text", "template", "simple"]
+categories = ["template-engine"]
+license = "BSD-3-Clause"
+repository = "https://github.com/MHmorgan/rustmhtemplate"
+documentation = "https://docs.rs/mhtemplate"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
