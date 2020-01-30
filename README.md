@@ -1,7 +1,8 @@
 mhtemplate
 ==========
 
-[![Latest version](https://img.shields.io/crates/v/mhtemplate.svg)](https://crates.io/crates/mhtemplate)
+[![Latest version](https://img.shields.io/crates/v/mhtemplate)](https://crates.io/crates/mhtemplate)
+![Downloads](https://img.shields.io/crates/d/mhtemplate)
 [![Documentation](https://docs.rs/mhtemplate/badge.svg)](https://docs.rs/mhtemplate/)
 [![GitHub license](https://img.shields.io/github/license/MHmorgan/rustmhtemplate)](https://github.com/MHmorgan/rustmhtemplate/blob/master/LICENSE)
 
