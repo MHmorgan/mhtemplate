@@ -13,7 +13,7 @@ Usage
 
 ```toml
 [dependencies]
-mhtemplate = "1"
+mhtemplate = "~1.0.0"
 ```
 
 ```rust
