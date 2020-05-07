@@ -1,4 +1,4 @@
-![MHtemplate](./mhtemplate.svg)
+![MHtemplate](./mhtemplate.png)
 
 [![Travis CI build status](https://img.shields.io/travis/com/MHmorgan/mhtemplate/master?style=flat-square)](https://travis-ci.com/MHmorgan/mhtemplate)
 [![Crates.io latest version](https://img.shields.io/crates/v/mhtemplate?style=flat-square)](https://crates.io/crates/mhtemplate)
