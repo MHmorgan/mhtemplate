@@ -12,7 +12,7 @@ repository = "https://github.com/MHmorgan/rustmhtemplate"
 documentation = "https://docs.rs/mhtemplate"
 
 [badges]
-travis-ci = { repository = "MHmorgan/mhlog", branch = "master" }
+travis-ci = { repository = "MHmorgan/mhtemplate", branch = "master" }
 
 [dependencies]
 regex = "1"
